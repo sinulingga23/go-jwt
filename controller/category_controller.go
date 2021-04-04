@@ -23,3 +23,7 @@ var UpdateCategoryByCategoryId = http.HandlerFunc(func(w http.ResponseWriter, r 
 var DeleteCategoryByCategoryId = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("DeleteCategoryByCategoryId"))
 })
+
+var GetProductsByCategoryId = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	w.Write([]byte("GetProductsByCategoryId"))
+})

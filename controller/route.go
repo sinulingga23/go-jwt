@@ -13,6 +13,7 @@ func RunServer() {
 	router.Handle("/categories/{categoryId}", GetCategoryByCategoryId).Methods("GET")
 	router.Handle("/categories/{categoryId}", UpdateCategoryByCategoryId).Methods("PUT")
 	router.Handle("/categories/{categoryId}", DeleteCategoryByCategoryId).Methods("DELETE")
+	router.Handle("/categories/{categoryId}/products", GetProductsByCategoryId).Methods("GET")
 
 	http.ListenAndServe(":8080", router)
 }
