@@ -16,12 +16,12 @@ func RunServer() {
 	router.Handle("/categories/{categoryId}", DeleteCategoryByCategoryId).Methods("DELETE")
 	router.Handle("/categories/{categoryId}/products", GetProductsByCategoryId).Methods("GET")
 
+	// endpoints products
 	router.Handle("/products", GetProducts).Methods("GET")
 	router.Handle("/products", CreateProduct).Methods("POST")
 	router.Handle("/products/{productId}", GetProductByProductId).Methods("GET")
 	router.Handle("/products/{productId}", UpdateProductByProductId).Methods("PUT")
 	router.Handle("/products/{productId}", DeleteProductByProductId).Methods("DELETE")
 
-	// endpoints products
 	http.ListenAndServe(":8080", router)
 }

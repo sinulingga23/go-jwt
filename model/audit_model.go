@@ -1,6 +1,11 @@
 package model
 
+import (
+	"time"
+	"database/sql"
+)
+
 type Audit struct {
-	CreatedAt	string	`json:"createdAt"`
-	UpdatedAt	*string	`json:"updatedAt"`
+	CreatedAt	time.Time	`json:"createdAt"`
+	UpdatedAt	sql.NullTime	`json:"updatedAt"`
 }
