@@ -148,6 +148,33 @@ func (c *Category) DeleteCategoryByCategoryId(categoryId int) (bool, error) {
 	return true, nil
 }
 
+func (c *Category) GetAllCategory() ([]Category, error)  {
+	db, err := database.ConnectDB()
+	if err != nil {
+		return []Category{}, err
+	}
+	defer db.Close()
+
+	rows, err := db.Query("SELECT category_id, category, created_at, updated_at FROM category")
+	if err != nil {
+		return []Category{}, err
+	}
+	defer rows.Close()
+
+	var result []Category
+	for rows.Next() {
+		var each Category
+		err = rows.Scan(&each.CategoryId, &each.Category, &each.Audit.CreatedAt, &each.Audit.UpdatedAt)
+		if err != nil {
+			return []Category{}, err
+		}
+
+		result = append(result, each)
+	}
+
+	return result, nil
+}
+
 func (c *Category) FindProductsByCategoryId(categoryId int) ([]Product, error) {
 	db, err := database.ConnectDB()
 	if err != nil {
