@@ -4,10 +4,12 @@ import (
 	"fmt"
 	"time"
 	"strings"
+	"strconv"
 	"net/http"
 	"encoding/json"
 
 	"github.com/sinulingga23/go-jwt/model"
+	"github.com/gorilla/mux"
 )
 
 
@@ -102,7 +104,58 @@ var CreateCategory = http.HandlerFunc(func(w http.ResponseWriter, r *http.Reques
 })
 
 var GetCategoryByCategoryId = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("GetCategoryByCategoryId"))
+	w.Header().Set("Content-Type", "application/json")
+	vars := mux.Vars(r)
+	var categoryId int
+
+	var err error
+	if  categoryId, err = strconv.Atoi(vars["categoryId"]); err != nil {
+		payload, _ := json.Marshal(struct {
+			StatusCode	int	`json:"statusCode"`
+			Message		string	`json:"message"`
+			Errors		string	`json:"errors"`
+		}{
+			http.StatusBadRequest, "Invalid request", "BadRequest",
+		})
+		w.Write([]byte(payload))
+		return
+	}
+
+	var categoryModel model.Category
+	if _, err = categoryModel.IsCategoryExistByCategoryId(categoryId); err != nil {
+		payload, _ := json.Marshal(struct {
+			StatusCode	int	`json:"statusCode"`
+			Message		string	`json:"message"`
+			Errors		string	`json:"errors"`
+		}{
+			http.StatusBadRequest, "Somethings wrong!", fmt.Sprintf("%s", err),
+		})
+		w.Write([]byte(payload))
+		return
+	}
+
+	var currentCategory model.Category
+	if currentCategory, err = categoryModel.FindCategoryByCategoryId(categoryId); err != nil {
+		payload, _ := json.Marshal(struct {
+			StatusCode	int	`json:"statusCode"`
+			Message		string	`json:"message"`
+			Errors		string	`json:"errors"`
+		}{
+			http.StatusBadRequest, "Somethings wrong!", fmt.Sprintf("%s", err),
+		})
+		w.Write([]byte(payload))
+		return
+	}
+
+	payload, _ := json.Marshal(struct {
+		StatusCode	int 		`json:"statusCode"`
+		Message 	string		`json:"message"`
+		Data		model.Category	`json:"category"`
+	}{
+		http.StatusOK, "Category is found!", currentCategory,
+	})
+	w.Write([]byte(payload))
+	return
 })
 
 var UpdateCategoryByCategoryId = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
