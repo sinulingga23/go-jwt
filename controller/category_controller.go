@@ -335,5 +335,81 @@ var DeleteCategoryByCategoryId = http.HandlerFunc(func(w http.ResponseWriter, r 
 })
 
 var GetProductsByCategoryId = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("GetProductsByCategoryId"))
+	w.Header().Set("Content-Type", "application/json")
+	vars := mux.Vars(r)
+	var categoryId int
+
+	var err error
+	if categoryId, err = strconv.Atoi(vars["categoryId"]); err != nil {
+		payload, _ := json.Marshal(struct {
+			StatusCode	int	`json:"statusCode"`
+			Message		string	`json:"message"`
+			Errors		string	`json:"errors"`
+		}{
+			http.StatusBadRequest, "Invalid request", "BadRequest",
+		})
+		w.Write([]byte(payload))
+		return
+	}
+
+	var categoryModel model.Category
+	var isExist bool = false
+	if isExist, err = categoryModel.IsCategoryExistByCategoryId(categoryId); err != nil {
+		payload, _ := json.Marshal(struct {
+			StatusCode	int	`json:"statusCode"`
+			Message		string	`json:"message"`
+			Errors		string	`json:"errors"`
+		}{
+			http.StatusNotFound, "Category can't be found", fmt.Sprintf("%s", err),
+		})
+		w.Write([]byte(payload))
+		return
+	}
+
+	if isExist {
+		var products []model.Product
+		if products, err = categoryModel.FindProductsByCategoryId(categoryId); err != nil {
+			payload, _ := json.Marshal(struct {
+				StatusCode	int	`json:"statusCode"`
+				Message		string	`json:"message"`
+				Errors		string	`json:"errors"`
+			}{
+				http.StatusInternalServerError, "Somethings wrong!", fmt.Sprintf("%s", err),
+			})
+			w.Write([]byte(payload))
+			return
+		}
+
+		if products != nil {
+			payload, _ := json.Marshal(struct {
+				StatusCode	int 		`json:"statusCode"`
+				Message		string 		`json:"message"`
+				CategoryId	int 		`json:"categoryId"`
+				Data		[]model.Product	`json:"products"`
+			}{
+				http.StatusOK, "succes to get the products", categoryId, products,
+			})
+			w.Write([]byte(payload))
+			return
+		} else {
+			payload, _ := json.Marshal(struct {
+				StatusCode	int	`json:"statusCode"`
+				Message		string	`json:"message"`
+				Errors		string	`json:"errors"`
+			}{
+				http.StatusNotFound, "The category don't have the products", "NotFound",
+			})
+			w.Write([]byte(payload))
+			return
+		}
+	}
+
+	payload, _ := json.Marshal(struct {
+		StatusCode	int	`json:"statusCode"`
+		Message		string	`json:"message"`
+	}{
+		http.StatusInternalServerError, "Somethings wrong!",
+	})
+	w.Write([]byte(payload))
+	return
 })
