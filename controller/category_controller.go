@@ -259,9 +259,8 @@ var UpdateCategoryByCategoryId = http.HandlerFunc(func(w http.ResponseWriter, r 
 	payload, _ := json.Marshal(struct {
 		StatusCode	int	`json:"statusCode"`
 		Message		string	`json:"message"`
-		Errors		string	`json:"errors"`
 	}{
-		http.StatusInternalServerError, "Somethings wrong!", fmt.Sprintf("%s", err),
+		http.StatusInternalServerError, "Somethings wrong!",
 	})
 	w.Write([]byte(payload))
 	return
