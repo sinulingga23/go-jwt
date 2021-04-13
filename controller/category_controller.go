@@ -267,7 +267,71 @@ var UpdateCategoryByCategoryId = http.HandlerFunc(func(w http.ResponseWriter, r 
 })
 
 var DeleteCategoryByCategoryId = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("DeleteCategoryByCategoryId"))
+	w.Header().Set("Content-Type", "application/json")
+	vars := mux.Vars(r)
+	var categoryId int
+
+	var err error
+	if categoryId, err = strconv.Atoi(vars["categoryId"]); err != nil || len(strings.Trim(vars["categoryId"], " ")) == 0 {
+		payload, _ := json.Marshal(struct {
+			StatusCode	int	`json:"statusCode"`
+			Message		string	`json:"message"`
+			Errors		string	`json:"errors"`
+		}{
+			http.StatusBadRequest, "Invalid request", "BadRequest",
+		})
+		w.Write([]byte(payload))
+		return
+	}
+
+	var categoryModel model.Category
+	var isExist bool = false
+	if isExist, err = categoryModel.IsCategoryExistByCategoryId(categoryId); err != nil {
+		payload, _ := json.Marshal(struct {
+			StatusCode	int	`json:"statusCode"`
+			Message		string	`json:"message"`
+			Errors		string	`json:"errors"`
+		}{
+			http.StatusNotFound, "Category can't be found", fmt.Sprintf("%s", err),
+		})
+		w.Write([]byte(payload))
+		return
+	}
+
+	if isExist {
+		var isDeleted bool = false
+		if isDeleted, err = categoryModel.DeleteCategoryByCategoryId(categoryId); err != nil {
+			payload, _ := json.Marshal(struct {
+				StatusCode	int	`json:"statusCode"`
+				Message		string	`json:"message"`
+				Errors		string	`json:"errors"`
+			}{
+				http.StatusInternalServerError, "Somethings wrong!", fmt.Sprintf("%s", err),
+			})
+			w.Write([]byte(payload))
+			return
+		}
+
+		if isDeleted {
+			payload, _ := json.Marshal(struct {
+				StatusCode	int 	`json:"statusCode"`
+				Message		string 	`json:"message"`
+			}{
+				http.StatusOK, "success to delete the category",
+			})
+			w.Write([]byte(payload))
+			return
+		}
+	}
+
+	payload, _ := json.Marshal(struct {
+		StatusCode	int	`json:"statusCode"`
+		Message		string	`json:"message"`
+	}{
+		http.StatusInternalServerError, "Somethings wrong!",
+	})
+	w.Write([]byte(payload))
+	return
 })
 
 var GetProductsByCategoryId = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
