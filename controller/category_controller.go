@@ -128,7 +128,7 @@ var GetCategoryByCategoryId = http.HandlerFunc(func(w http.ResponseWriter, r *ht
 			Message		string	`json:"message"`
 			Errors		string	`json:"errors"`
 		}{
-			http.StatusBadRequest, "Somethings wrong!", fmt.Sprintf("%s", err),
+			http.StatusNotFound, "Category can't be found", fmt.Sprintf("%s", err),
 		})
 		w.Write([]byte(payload))
 		return
@@ -159,7 +159,112 @@ var GetCategoryByCategoryId = http.HandlerFunc(func(w http.ResponseWriter, r *ht
 })
 
 var UpdateCategoryByCategoryId = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("UpdateCategoryByCategoryId"))
+	w.Header().Set("Content-Type", "application/json")
+	vars := mux.Vars(r)
+	var categoryId int
+
+	var err error
+	if categoryId, err = strconv.Atoi(vars["categoryId"]); err != nil {
+		payload, _ := json.Marshal(struct {
+			StatusCode	int	`json:"statusCode"`
+			Message		string	`json:"message"`
+			Errors		string	`json:"errors"`
+		}{
+			http.StatusBadRequest, "Invalid request", "BadRequest",
+		})
+		w.Write([]byte(payload))
+		return
+	}
+
+	var categoryRequest model.Category
+	if err = json.NewDecoder(r.Body).Decode(&categoryRequest); err != nil {
+		payload, _ := json.Marshal(struct {
+			StatusCode	int	`json:"statusCode"`
+			Message		string	`json:"message"`
+			Errors		string	`json:"errors"`
+		}{
+			http.StatusBadRequest, "invalid", fmt.Sprintf("%s", err),
+		})
+		w.Write([]byte(payload))
+		return
+	}
+
+	if categoryRequest.CategoryId != categoryId {
+		payload, _ := json.Marshal(struct {
+			StatusCode	int	`json:"statusCode"`
+			Message		string	`json:"message"`
+			Errors 		string 	`json:"errors"`
+		}{
+			http.StatusBadRequest, "CategoryId is not same", "BadRequest",
+		})
+		w.Write([]byte(payload))
+		return
+	}
+
+	var categoryModel model.Category
+	var isExist bool = false
+	if isExist, err = categoryModel.IsCategoryExistByCategoryId(categoryId); err != nil {
+		payload, _ := json.Marshal(struct {
+			StatusCode	int	`json:"statusCode"`
+			Message		string	`json:"message"`
+			Errors		string	`json:"errors"`
+		}{
+			http.StatusNotFound, "Category can't be found", fmt.Sprintf("%s", err),
+		})
+		w.Write([]byte(payload))
+		return
+	}
+
+	if isExist {
+		var currentCategory model.Category
+		if currentCategory, err = categoryModel.FindCategoryByCategoryId(categoryId); err != nil {
+			payload, _ := json.Marshal(struct {
+				StatusCode	int	`json:"statusCode"`
+				Message		string	`json:"message"`
+				Errors		string	`json:"errors"`
+			}{
+				http.StatusInternalServerError, "Somethings wrong!", fmt.Sprintf("%s", err),
+			})
+			w.Write([]byte(payload))
+			return
+		}
+
+		currentCategory.Category = categoryRequest.Category
+		var updatedAt string = time.Now().Format("2006-01-02 15:05:03")
+		currentCategory.Audit.UpdatedAt = &updatedAt
+
+		var updatedCategory model.Category
+		if updatedCategory, err = currentCategory.UpdateCategoryByCategoryId(categoryId); err != nil {
+			payload, _ := json.Marshal(struct {
+				StatusCode	int	`json:"statusCode"`
+				Message		string	`json:"message"`
+				Errors		string	`json:"errors"`
+			}{
+				http.StatusInternalServerError, "Somethings wrong!", fmt.Sprintf("%s", err),
+			})
+			w.Write([]byte(payload))
+			return
+		} else {
+			payload, _ := json.Marshal(struct {
+				StatusCode	int		`json:"statusCode"`
+				Message		string		`json:"message"`
+				Data		model.Category	`json:"category"`
+			}{
+				http.StatusOK, "success to update the category", updatedCategory,
+			})
+			w.Write([]byte(payload))
+			return
+		}
+	}
+	payload, _ := json.Marshal(struct {
+		StatusCode	int	`json:"statusCode"`
+		Message		string	`json:"message"`
+		Errors		string	`json:"errors"`
+	}{
+		http.StatusInternalServerError, "Somethings wrong!", fmt.Sprintf("%s", err),
+	})
+	w.Write([]byte(payload))
+	return
 })
 
 var DeleteCategoryByCategoryId = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
