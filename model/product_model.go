@@ -1,7 +1,9 @@
 package model
 
 import (
-	"errros"
+	"errors"
+
+	database "github.com/sinulingga23/go-jwt/db"
 )
 
 type Product struct {
@@ -11,6 +13,7 @@ type Product struct {
 	Unit		string  `json:"unit"`
 	Price		float64 `json:"price"`
 	Stock           int     `json:"stock"`
+	AddSotck	int 	`json:"addStock"`
 	Audit           Audit   `json:"audit"`
 }
 
@@ -56,7 +59,7 @@ func (p *Product) SaveProduct() (Product, error) {
 	if lastInsertId, err = result.LastInsertId(); err != nil {
 		return Product{}, err
 	}
-	c.ProductId = int(lastInsertId)
+	p.ProductId = int(lastInsertId)
 
 	var product Product
 	product = Product{
@@ -64,7 +67,7 @@ func (p *Product) SaveProduct() (Product, error) {
 			CategoryId: p.CategoryId,
 			Name: p.Name,
 			Unit: p.Unit,
-			Price: p.price,
+			Price: p.Price,
 			Stock: p.Stock,
 			Audit: Audit {CreatedAt: p.Audit.CreatedAt},
 		}
@@ -85,9 +88,43 @@ func (p *Product) FindProductByProductId(productId int) (Product, error) {
 		return Product{}, err
 	}
 
-	if Product == (Product{}) {
+	if product == (Product{}) {
 		return Product{}, errors.New("Product can't found")
 	}
 
-	return Product, nil
+	return product, nil
+}
+
+// TODO: Update stock with new arrived
+func (p *Product) UpdateProductByProductId(productId int) (Product, error) {
+	db, err := database.ConnectDB()
+	if err != nil {
+		return Product{}, err
+	}
+	defer db.Close()
+
+	p.Stock = p.Stock + p.AddSotck
+	result, err := db.Exec("UPDATE product SET product_id = ?, category_id = ?, name = ?, unit = ?, price = ?, stock = ?, created_at = ?, updated_at = ? WHERE product_id = ?",
+		p.ProductId,
+		p.CategoryId,
+		p.Name,
+		p.Unit,
+		p.Price,
+		p.Stock,
+		p.Audit.CreatedAt,
+		p.Audit.UpdatedAt)
+	if err != nil {
+		return Product{}, err
+	}
+
+	var lastInsertId int
+	if lastInsertId, err = result.LastInsertId(); err != nil  {
+		return Product{}, errors.New("Somethings wrong!")
+	}
+
+	if lastInsertId != 1 {
+		return Product{}, errors.New("Somethings wrong")
+	}
+
+	return p, nil
 }
