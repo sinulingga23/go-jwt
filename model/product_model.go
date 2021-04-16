@@ -95,6 +95,32 @@ func (p *Product) FindProductByProductId(productId int) (Product, error) {
 	return product, nil
 }
 
+func (p *Product) FindAllProduct() ([]Product, error) {
+	db, err := database.ConnectDB()
+	if err != nil {
+		return []Product{}, err
+	}
+	defer db.Close()
+
+	rows, err := db.Query("SELECT product_id, category_id, name, unit, price, stock, created_at, updated_at FROM product")
+	if err != nil {
+		return []Product{}, err
+	}
+
+	var result []Product
+	for rows.Next() {
+		var each Product
+		err = rows.Scan(&each.ProductId, &each.CategoryId, &each.Name, &each.Unit, &each.Price, &each.Stock, &each.Audit.CreatedAt, &each.Audit.UpdatedAt)
+		if err != nil {
+			return []Product{}, err
+		}
+
+		result = append(result, each)
+	}
+
+	return result, nil
+}
+
 func (p *Product) UpdateProductByProductId(productId int) (Product, error) {
 	db, err := database.ConnectDB()
 	if err != nil {
@@ -116,14 +142,24 @@ func (p *Product) UpdateProductByProductId(productId int) (Product, error) {
 		return Product{}, err
 	}
 
-	var lastInsertId int
+	var lastInsertId int64
 	if lastInsertId, err = result.LastInsertId(); err != nil  {
 		return Product{}, errors.New("Somethings wrong!")
 	}
 
-	if lastInsertId != 1 {
+	if int(lastInsertId) != 1 {
 		return Product{}, errors.New("Somethings wrong")
 	}
 
-	return p, nil
+	var product Product
+	product = Product{
+		ProductId: p.ProductId,
+			CategoryId: p.CategoryId,
+			Name: p.Name,
+			Unit: p.Unit,
+			Price: p.Price,
+			Stock: p.Stock,
+			Audit: Audit {CreatedAt: p.Audit.CreatedAt},
+	}
+	return product, nil
 }
