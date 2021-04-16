@@ -9,7 +9,7 @@ import (
 type Product struct {
 	ProductId	int 	`json:"productId"`
 	CategoryId	int  	`json:"categoryProductId"`
-	Name		string  `json:"product"`
+	Name		string  `json:"name"`
 	Unit		string  `json:"unit"`
 	Price		float64 `json:"price"`
 	Stock           int     `json:"stock"`
