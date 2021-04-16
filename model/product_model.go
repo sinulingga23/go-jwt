@@ -95,7 +95,6 @@ func (p *Product) FindProductByProductId(productId int) (Product, error) {
 	return product, nil
 }
 
-// TODO: Update stock with new arrived
 func (p *Product) UpdateProductByProductId(productId int) (Product, error) {
 	db, err := database.ConnectDB()
 	if err != nil {
