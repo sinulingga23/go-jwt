@@ -128,7 +128,7 @@ func (p *Product) UpdateProductByProductId(productId int) (Product, error) {
 	}
 	defer db.Close()
 
-	p.Stock = p.Stock + p.AddSotck
+
 	result, err := db.Exec("UPDATE product SET product_id = ?, category_id = ?, name = ?, unit = ?, price = ?, stock = ?, created_at = ?, updated_at = ? WHERE product_id = ?",
 		p.ProductId,
 		p.CategoryId,
