@@ -9,7 +9,7 @@ import (
 )
 
 func ConnectDB() (*sql.DB, error) {
-	right := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?parseTime=true",
+	right := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s",
 		os.Getenv("DB_USER"),
 		os.Getenv("DB_PASS"),
 		os.Getenv("DB_HOST"),
