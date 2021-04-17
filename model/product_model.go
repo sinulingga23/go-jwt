@@ -168,3 +168,31 @@ func (p *Product) UpdateProductByProductId(productId int) (Product, error) {
 	}
 	return product, nil
 }
+
+func (p *Product) DeleteProductByProductId(productId int) (bool, error) {
+	db, err := database.ConnectDB()
+	if err != nil {
+		return false, err
+	}
+	defer db.Close()
+
+	result, err := db.Exec("DELETE FROM product WHERE product_id = ?", productId)
+	if err != nil {
+		return false, err
+	}
+
+	var rowsAffected int64
+	if rowsAffected, err = result.RowsAffected(); err != nil {
+		return false, err
+	}
+
+	if rowsAffected == 0 {
+		return false, errors.New("Maybe the product is not exist.")
+	}
+
+	if rowsAffected != 1 {
+		return false, errors.New("Somethings wrong!")
+	}
+
+	return true, nil
+}
