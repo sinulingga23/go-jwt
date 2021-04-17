@@ -2,6 +2,8 @@ package controller
 
 import (
 	"fmt"
+	"time"
+	"strings"
 	"net/http"
 	"encoding/json"
 
@@ -39,7 +41,119 @@ var GetProducts = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) 
 })
 
 var CreateProduct = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("CreateProduct"))
+	w.Header().Set("Content-Type", "application/json")
+
+	var productRequest model.Product
+	var categoryModel model.Category
+	var err error
+
+	if err = json.NewDecoder(r.Body).Decode(&productRequest); err != nil {
+		payload, _ := json.Marshal(struct {
+			StatusCode	int	`json:"statusCode"`
+			Message		string	`json:"message"`
+			Errors		string	`json:"errors"`
+		}{
+			http.StatusBadRequest, "invalid", fmt.Sprintf("%s", err),
+		})
+		w.Write([]byte(payload))
+		return
+	}
+
+	if len(strings.Trim(productRequest.Name, " ")) == 0 {
+		payload, _ := json.Marshal(struct {
+			StatusCode	int	`json:"statusCode"`
+			Message		string	`json:"message"`
+			Errors		string	`json:"errors"`
+		}{
+			http.StatusBadRequest, "Product name can't be empty", "BadRequest",
+		})
+		w.Write([]byte(payload))
+		return
+	}
+
+	if len(strings.Trim(productRequest.Unit, " ")) == 0 {
+		payload, _ := json.Marshal(struct {
+			StatusCode	int	`json:"statusCode"`
+			Message		string	`json:"message"`
+			Errors		string	`json:"errors"`
+		}{
+			http.StatusBadRequest, "Unit can't be empty", "BadRequest",
+		})
+		w.Write([]byte(payload))
+		return
+	}
+
+	if productRequest.Stock < 0 {
+		payload, _ := json.Marshal(struct {
+			StatusCode	int	`json:"statusCode"`
+			Message		string	`json:"message"`
+			Errors		string	`json:"errors"`
+		}{
+			http.StatusBadRequest, "Stock can't be negative", "BadRequest",
+		})
+		w.Write([]byte(payload))
+		return
+	}
+
+	if productRequest.Price < 0 {
+		payload, _ := json.Marshal(struct {
+			StatusCode	int	`json:"statusCode"`
+			Message		string	`json:"message"`
+			Errors		string	`json:"errors"`
+		}{
+			http.StatusBadRequest, "Price can't be negative", "BadRequest",
+		})
+		w.Write([]byte(payload))
+		return
+	}
+
+	var isExist bool = false
+	if isExist, err = categoryModel.IsCategoryExistByCategoryId(productRequest.CategoryId); err != nil {
+		payload, _ := json.Marshal(struct {
+			StatusCode	int	`json:"statusCode"`
+			Message		string	`json:"message"`
+			Errors		string	`json:"errors"`
+		}{
+			http.StatusNotFound, "Category can't be found", fmt.Sprintf("%s", err),
+		})
+		w.Write([]byte(payload))
+		return
+	}
+
+	if isExist {
+		var createdProduct model.Product
+		productRequest.Audit.CreatedAt = time.Now().Format("2006-01-02 15:05:03")
+		if createdProduct, err = productRequest.SaveProduct(); err != nil {
+			payload, _ := json.Marshal(struct {
+				StatusCode	int	`json:"statusCode"`
+				Message		string 	`json:"message"`
+				Errors		string	`json:"errors"`
+			}{
+				http.StatusInternalServerError, "Somethings wrong!", fmt.Sprintf("%s", err),
+			})
+			w.Write([]byte(payload))
+			return
+		}
+
+		payload, _ := json.Marshal(struct {
+			StatusCode	int 		`json:"statusCode"`
+			Message		string		`json:"message"`
+			Data		model.Product	`json:"product"`
+		}{
+			http.StatusOK, "Success to create a new product", createdProduct,
+		})
+		w.Write([]byte(payload))
+		return
+	}
+
+	payload, _ := json.Marshal(struct {
+		StatusCode	int	`json:"statusCode"`
+		Message		string	`json:"message"`
+	}{
+		http.StatusInternalServerError, "Somethings wrong!",
+	})
+	w.Write([]byte(payload))
+	return
 })
 
 var GetProductByProductId = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
