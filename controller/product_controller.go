@@ -4,11 +4,12 @@ import (
 	"fmt"
 	"time"
 	"strings"
+	"strconv"
 	"net/http"
 	"encoding/json"
 
 	"github.com/sinulingga23/go-jwt/model"
-	_"github.com/gorilla/mux"
+	"github.com/gorilla/mux"
 )
 
 var GetProducts = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -157,7 +158,68 @@ var CreateProduct = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request
 })
 
 var GetProductByProductId = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("GetProductByProductId"))
+	w.Header().Set("Content-Type", "application/json")
+	vars := mux.Vars(r)
+	var productId int
+
+	var err error
+	if productId, err = strconv.Atoi(vars["productId"]); err != nil {
+		payload, _ := json.Marshal(struct {
+			StatusCode	int	`json:"statusCode"`
+			Message		string	`json:"message"`
+			Errors		string	`json:"errors"`
+		}{
+			http.StatusBadRequest, "Invalid request", "BadRequest",
+		})
+		w.Write([]byte(payload))
+		return
+	}
+
+	var productModel model.Product
+	if _, err = productModel.IsProductExistByProductId(productId); err != nil {
+		payload, _ := json.Marshal(struct {
+			StatusCode	int	`json:"statusCode"`
+			Message		string	`json:"message"`
+			Errors		string	`json:"errors"`
+		}{
+			http.StatusNotFound, "Product can't be found", fmt.Sprintf("%s", err),
+		})
+		w.Write([]byte(payload))
+		return
+	}
+
+	var currentProduct model.Product
+	if currentProduct, err = productModel.FindProductByProductId(productId); err != nil {
+		payload, _ := json.Marshal(struct {
+			StatusCode	int	`json:"statusCode"`
+			Message		string	`json:"message"`
+			Errors		string	`json:"errors"`
+		}{
+			http.StatusBadRequest, "Somethings wrong!", fmt.Sprintf("%s", err),
+		})
+		w.Write([]byte(payload))
+		return
+	}
+
+	if currentProduct != (model.Product{}) {
+		payload, _ := json.Marshal(struct {
+			StatusCode	int 		`json:"statusCode"`
+			Message		string 		`json:"message"`
+			Data 		model.Product	`json:"product"`
+		}{
+			http.StatusOK, "Product is found!", currentProduct,
+		})
+		w.Write([]byte(payload))
+	}
+
+	payload, _ := json.Marshal(struct {
+		StatusCode	int	`json:"statusCode"`
+		Message		string	`json:"message"`
+	}{
+		http.StatusInternalServerError, "Somethings wrong!",
+	})
+	w.Write([]byte(payload))
+	return
 })
 
 var UpdateProductByProductId = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
