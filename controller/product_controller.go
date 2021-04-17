@@ -446,5 +446,69 @@ var UpdateProductByProductId = http.HandlerFunc(func(w http.ResponseWriter, r *h
 })
 
 var DeleteProductByProductId = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("DeleteProductByProductId"))
+	w.Header().Set("Content-Type", "application/json")
+	vars := mux.Vars(r)
+	var productId int
+
+	var err error
+	if productId, err = strconv.Atoi(vars["productId"]); err != nil {
+		payload, _ := json.Marshal(struct {
+			StatusCode	int	`json:"statusCode"`
+			Message		string	`json:"message"`
+			Errors		string	`json:"errors"`
+		}{
+			http.StatusBadRequest, "Invalid request", "BadRequest",
+		})
+		w.Write([]byte(payload))
+		return
+	}
+
+	var productModel model.Product
+	var isExist bool = false
+	if isExist, err = productModel.IsProductExistByProductId(productId); err != nil {
+		payload, _ := json.Marshal(struct {
+			StatusCode	int	`json:"statusCode"`
+			Message		string	`json:"message"`
+			Errors		string	`json:"errors"`
+		}{
+			http.StatusNotFound, "Product can't be found", fmt.Sprintf("%s", err),
+		})
+		w.Write([]byte(payload))
+		return
+	}
+
+	if isExist {
+		var isDeleted bool = false
+		if isDeleted, err = productModel.DeleteProductByProductId(productId); err != nil {
+			payload, _ := json.Marshal(struct {
+				StatusCode	int	`json:"statusCode"`
+				Message		string	`json:"message"`
+				Errors		string	`json:"errors"`
+			}{
+				http.StatusInternalServerError, "Somethings wrong!", fmt.Sprintf("%s", err),
+			})
+			w.Write([]byte(payload))
+			return
+		}
+
+		if isDeleted {
+			payload, _ := json.Marshal(struct {
+				StatusCode	int 	`json:"statusCode"`
+				Message 	string	`json:"message"`
+			}{
+				http.StatusOK, "Success to delete the product",
+			})
+			w.Write([]byte(payload))
+			return
+		}
+	}
+
+	payload, _ := json.Marshal(struct {
+		StatusCode	int	`json:"statusCode"`
+		Message		string	`json:"message"`
+	}{
+		http.StatusInternalServerError, "Somethings wrong!",
+	})
+	w.Write([]byte(payload))
+	return
 })
