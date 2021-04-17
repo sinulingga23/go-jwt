@@ -137,17 +137,22 @@ func (p *Product) UpdateProductByProductId(productId int) (Product, error) {
 		p.Price,
 		p.Stock,
 		p.Audit.CreatedAt,
-		p.Audit.UpdatedAt)
+		p.Audit.UpdatedAt,
+		productId)
 	if err != nil {
 		return Product{}, err
 	}
 
-	var lastInsertId int64
-	if lastInsertId, err = result.LastInsertId(); err != nil  {
+	var rowsAffected int64
+	if rowsAffected, err = result.RowsAffected(); err != nil  {
 		return Product{}, errors.New("Somethings wrong!")
 	}
 
-	if int(lastInsertId) != 1 {
+	if rowsAffected == 0 {
+		return Product{}, errors.New("Maybe the product is not exist.")
+	}
+
+	if rowsAffected != 1 {
 		return Product{}, errors.New("Somethings wrong")
 	}
 
@@ -159,7 +164,7 @@ func (p *Product) UpdateProductByProductId(productId int) (Product, error) {
 			Unit: p.Unit,
 			Price: p.Price,
 			Stock: p.Stock,
-			Audit: Audit {CreatedAt: p.Audit.CreatedAt},
+			Audit: Audit {CreatedAt: p.Audit.CreatedAt, UpdatedAt: p.Audit.UpdatedAt},
 	}
 	return product, nil
 }
