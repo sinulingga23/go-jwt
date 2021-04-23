@@ -8,7 +8,7 @@ import (
 )
 
 type UserLogin struct {
-	Email		string 	`json:"username"`
+	Email		string 	`json:"email"`
 	Password	string 	`json:"password"`
 }
 
@@ -46,10 +46,10 @@ func (ul *UserLogin) IsUserValid(email string, password string) (bool, error) {
 		return false, err
 	}
 
-	err = bcrypt.CompareHashAndPassword([]byte(password), currentPassword)
+	err = bcrypt.CompareHashAndPassword([]byte(password), []byte(currentPassword))
 	if err != nil {
 		return false, errors.New("Somethings wrong!")
 	}
 
-	return true, false
+	return true, nil
 }
