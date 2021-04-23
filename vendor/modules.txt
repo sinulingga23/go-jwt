@@ -2,6 +2,7 @@
 ## explicit
 # github.com/dgrijalva/jwt-go v3.2.0+incompatible
 ## explicit
+github.com/dgrijalva/jwt-go
 # github.com/go-sql-driver/mysql v1.6.0
 ## explicit
 github.com/go-sql-driver/mysql
@@ -10,3 +11,7 @@ github.com/go-sql-driver/mysql
 github.com/gorilla/mux
 # github.com/rs/cors v1.7.0
 ## explicit
+# golang.org/x/crypto v0.0.0-20210421170649-83a5a9bb288b
+## explicit
+golang.org/x/crypto/bcrypt
+golang.org/x/crypto/blowfish
