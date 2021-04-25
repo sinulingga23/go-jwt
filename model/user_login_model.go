@@ -46,7 +46,7 @@ func (ul *UserLogin) IsUserValid(email string, password string) (bool, error) {
 		return false, err
 	}
 
-	err = bcrypt.CompareHashAndPassword([]byte(password), []byte(currentPassword))
+	err = bcrypt.CompareHashAndPassword([]byte(currentPassword), []byte(password))
 	if err != nil {
 		return false, errors.New("Somethings wrong!")
 	}
