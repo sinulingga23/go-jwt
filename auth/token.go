@@ -3,11 +3,9 @@ package auth
 import (
 	"os"
 	"fmt"
-	"log"
 	"time"
 	"strings"
 	"net/http"
-	"encoding/json"
 
 	"github.com/sinulingga23/go-jwt/model"
 	"github.com/dgrijalva/jwt-go"
@@ -45,7 +43,7 @@ func ExtractToken(r *http.Request) string {
 
 func TokenValid(r *http.Request) error {
 	tokenString := ExtractToken(r)
-	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+	_, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
 		}
@@ -53,14 +51,6 @@ func TokenValid(r *http.Request) error {
 	})
 	if err != nil {
 		return err
-	}
-
-	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-		b, err := json.MarshalIndent(claims, "", " ")
-		if err != nil {
-			log.Printf("%v", err)
-		}
-		fmt.Printf("%v", string(b))
 	}
 	return nil
 }
