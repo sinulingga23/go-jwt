@@ -9,8 +9,8 @@ import (
 	"github.com/sinulingga23/go-jwt/auth"
 )
 
-func CheckAuthenticationMiddleware(next http.HandlerFunc) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
+func CheckAuthenticationMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var err error
 		if err = auth.TokenValid(r); err != nil {
 			payload, _ := json.Marshal(struct {
@@ -24,6 +24,6 @@ func CheckAuthenticationMiddleware(next http.HandlerFunc) http.HandlerFunc {
 			w.Write([]byte(payload))
 			return
 		}
-		next(w, r)
-	}
+		next.ServeHTTP(w, r)
+	})
 }
