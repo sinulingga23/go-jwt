@@ -25,6 +25,7 @@ var LoginUser = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		}{
 			http.StatusBadRequest, "invalid", fmt.Sprintf("%s", err),
 		})
+		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(payload))
 		return
 	}
@@ -38,6 +39,7 @@ var LoginUser = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		}{
 			http.StatusNotFound, "User can't be found", fmt.Sprintf("%s", err),
 		})
+		w.WriteHeader(http.StatusNotFound)
 		w.Write([]byte(payload))
 		return
 	}
@@ -52,6 +54,7 @@ var LoginUser = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			}{
 				http.StatusUnauthorized, "Make sure the email and password is correct.", fmt.Sprintf("%s", err),
 			})
+			w.WriteHeader(http.StatusUnauthorized)
 			w.Write([]byte(payload))
 			return
 		}
@@ -67,16 +70,18 @@ var LoginUser = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				}{
 					http.StatusInternalServerError, "Somethings wrong!", fmt.Sprintf("%s", err),
 				})
+				w.WriteHeader(http.StatusInternalServerError)
 				w.Write([]byte(payload))
 				return
 			}
-
-			// http.SetCookie(w, &http.Cookie{
-			// 	Name: "token",
-			// 	Value: tokenString,
-			// 	Expires: expirationTime,
-			// })
-			w.Write([]byte(tokenString))
+			payload, _ := json.Marshal(struct {
+				StatusCode	int 	`json:"statusCode"`
+				Token		string 	`json:"token"`
+			}{
+				http.StatusOK, tokenString,
+			})
+			w.WriteHeader(http.StatusOK)
+			w.Write([]byte(payload))
 			return
 		}
 	}
@@ -87,6 +92,7 @@ var LoginUser = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 	}{
 		http.StatusInternalServerError, "Somethings wrong!",
 	})
+	w.WriteHeader(http.StatusInternalServerError)
 	w.Write([]byte(payload))
 	return
 })
