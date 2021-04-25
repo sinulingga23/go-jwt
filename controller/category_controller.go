@@ -31,6 +31,7 @@ var GetCategories = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request
 			"Somethings wrong!",
 			fmt.Sprintf("%s", err),
 		})
+		w.WriteHeader(http.StatusNotFound)
 		w.Write([]byte(payload))
 		return
 	}
@@ -44,6 +45,7 @@ var GetCategories = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request
 		"Success to get categories",
 		categories,
 	})
+	w.WriteHeader(http.StatusOK)
 	w.Write([]byte(payload))
 	return
 })
@@ -62,6 +64,7 @@ var CreateCategory = http.HandlerFunc(func(w http.ResponseWriter, r *http.Reques
 		}{
 			http.StatusBadRequest, "invalid", fmt.Sprintf("%s", err),
 		})
+		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(payload))
 		return
 	}
@@ -74,6 +77,7 @@ var CreateCategory = http.HandlerFunc(func(w http.ResponseWriter, r *http.Reques
 		}{
 			http.StatusBadRequest, "Category name can't be empty.", "BadRequest",
 		})
+		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(payload))
 		return
 	}
@@ -88,6 +92,7 @@ var CreateCategory = http.HandlerFunc(func(w http.ResponseWriter, r *http.Reques
 		}{
 			http.StatusInternalServerError, "Somethings wrong!", fmt.Sprintf("%s", err),
 		})
+		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(payload))
 		return
 	}
@@ -99,6 +104,7 @@ var CreateCategory = http.HandlerFunc(func(w http.ResponseWriter, r *http.Reques
 	}{
 		http.StatusOK, "success to create a new category", createdCategory,
 	})
+	w.WriteHeader(http.StatusOK)
 	w.Write([]byte(payload))
 	return
 })
@@ -117,6 +123,7 @@ var GetCategoryByCategoryId = http.HandlerFunc(func(w http.ResponseWriter, r *ht
 		}{
 			http.StatusBadRequest, "Invalid request", "BadRequest",
 		})
+		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(payload))
 		return
 	}
@@ -130,6 +137,7 @@ var GetCategoryByCategoryId = http.HandlerFunc(func(w http.ResponseWriter, r *ht
 		}{
 			http.StatusNotFound, "Category can't be found", fmt.Sprintf("%s", err),
 		})
+		w.WriteHeader(http.StatusNotFound)
 		w.Write([]byte(payload))
 		return
 	}
@@ -143,6 +151,7 @@ var GetCategoryByCategoryId = http.HandlerFunc(func(w http.ResponseWriter, r *ht
 		}{
 			http.StatusBadRequest, "Somethings wrong!", fmt.Sprintf("%s", err),
 		})
+		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(payload))
 		return
 	}
@@ -154,6 +163,7 @@ var GetCategoryByCategoryId = http.HandlerFunc(func(w http.ResponseWriter, r *ht
 	}{
 		http.StatusOK, "Category is found!", currentCategory,
 	})
+	w.WriteHeader(http.StatusOK)
 	w.Write([]byte(payload))
 	return
 })
@@ -172,6 +182,7 @@ var UpdateCategoryByCategoryId = http.HandlerFunc(func(w http.ResponseWriter, r 
 		}{
 			http.StatusBadRequest, "Invalid request", "BadRequest",
 		})
+		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(payload))
 		return
 	}
@@ -185,6 +196,7 @@ var UpdateCategoryByCategoryId = http.HandlerFunc(func(w http.ResponseWriter, r 
 		}{
 			http.StatusBadRequest, "invalid", fmt.Sprintf("%s", err),
 		})
+		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(payload))
 		return
 	}
@@ -197,6 +209,7 @@ var UpdateCategoryByCategoryId = http.HandlerFunc(func(w http.ResponseWriter, r 
 		}{
 			http.StatusBadRequest, "CategoryId is not same", "BadRequest",
 		})
+		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(payload))
 		return
 	}
@@ -211,6 +224,7 @@ var UpdateCategoryByCategoryId = http.HandlerFunc(func(w http.ResponseWriter, r 
 		}{
 			http.StatusNotFound, "Category can't be found", fmt.Sprintf("%s", err),
 		})
+		w.WriteHeader(http.StatusNotFound)
 		w.Write([]byte(payload))
 		return
 	}
@@ -225,6 +239,7 @@ var UpdateCategoryByCategoryId = http.HandlerFunc(func(w http.ResponseWriter, r 
 			}{
 				http.StatusInternalServerError, "Somethings wrong!", fmt.Sprintf("%s", err),
 			})
+			w.WriteHeader(http.StatusInternalServerError)
 			w.Write([]byte(payload))
 			return
 		}
@@ -242,6 +257,7 @@ var UpdateCategoryByCategoryId = http.HandlerFunc(func(w http.ResponseWriter, r 
 			}{
 				http.StatusInternalServerError, "Somethings wrong!", fmt.Sprintf("%s", err),
 			})
+			w.WriteHeader(http.StatusInternalServerError)
 			w.Write([]byte(payload))
 			return
 		} else {
@@ -252,6 +268,7 @@ var UpdateCategoryByCategoryId = http.HandlerFunc(func(w http.ResponseWriter, r 
 			}{
 				http.StatusOK, "success to update the category", updatedCategory,
 			})
+			w.WriteHeader(http.StatusOK)
 			w.Write([]byte(payload))
 			return
 		}
@@ -262,6 +279,7 @@ var UpdateCategoryByCategoryId = http.HandlerFunc(func(w http.ResponseWriter, r 
 	}{
 		http.StatusInternalServerError, "Somethings wrong!",
 	})
+	w.WriteHeader(http.StatusInternalServerError)
 	w.Write([]byte(payload))
 	return
 })
@@ -280,6 +298,7 @@ var DeleteCategoryByCategoryId = http.HandlerFunc(func(w http.ResponseWriter, r 
 		}{
 			http.StatusBadRequest, "Invalid request", "BadRequest",
 		})
+		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(payload))
 		return
 	}
@@ -294,6 +313,7 @@ var DeleteCategoryByCategoryId = http.HandlerFunc(func(w http.ResponseWriter, r 
 		}{
 			http.StatusNotFound, "Category can't be found", fmt.Sprintf("%s", err),
 		})
+		w.WriteHeader(http.StatusNotFound)
 		w.Write([]byte(payload))
 		return
 	}
@@ -308,6 +328,7 @@ var DeleteCategoryByCategoryId = http.HandlerFunc(func(w http.ResponseWriter, r 
 			}{
 				http.StatusInternalServerError, "Somethings wrong!", fmt.Sprintf("%s", err),
 			})
+			w.WriteHeader(http.StatusInternalServerError)
 			w.Write([]byte(payload))
 			return
 		}
@@ -319,6 +340,7 @@ var DeleteCategoryByCategoryId = http.HandlerFunc(func(w http.ResponseWriter, r 
 			}{
 				http.StatusOK, "success to delete the category",
 			})
+			w.WriteHeader(http.StatusOK)
 			w.Write([]byte(payload))
 			return
 		}
@@ -330,6 +352,7 @@ var DeleteCategoryByCategoryId = http.HandlerFunc(func(w http.ResponseWriter, r 
 	}{
 		http.StatusInternalServerError, "Somethings wrong!",
 	})
+	w.WriteHeader(http.StatusInternalServerError)
 	w.Write([]byte(payload))
 	return
 })
@@ -348,6 +371,7 @@ var GetProductsByCategoryId = http.HandlerFunc(func(w http.ResponseWriter, r *ht
 		}{
 			http.StatusBadRequest, "Invalid request", "BadRequest",
 		})
+		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(payload))
 		return
 	}
@@ -362,6 +386,7 @@ var GetProductsByCategoryId = http.HandlerFunc(func(w http.ResponseWriter, r *ht
 		}{
 			http.StatusNotFound, "Category can't be found", fmt.Sprintf("%s", err),
 		})
+		w.WriteHeader(http.StatusNotFound)
 		w.Write([]byte(payload))
 		return
 	}
@@ -376,6 +401,7 @@ var GetProductsByCategoryId = http.HandlerFunc(func(w http.ResponseWriter, r *ht
 			}{
 				http.StatusInternalServerError, "Somethings wrong!", fmt.Sprintf("%s", err),
 			})
+			w.WriteHeader(http.StatusInternalServerError)
 			w.Write([]byte(payload))
 			return
 		}
@@ -389,6 +415,7 @@ var GetProductsByCategoryId = http.HandlerFunc(func(w http.ResponseWriter, r *ht
 			}{
 				http.StatusOK, "succes to get the products", categoryId, products,
 			})
+			w.WriteHeader(http.StatusOK)
 			w.Write([]byte(payload))
 			return
 		} else {
@@ -399,6 +426,7 @@ var GetProductsByCategoryId = http.HandlerFunc(func(w http.ResponseWriter, r *ht
 			}{
 				http.StatusNotFound, "The category don't have the products", "NotFound",
 			})
+			w.WriteHeader(http.StatusNotFound)
 			w.Write([]byte(payload))
 			return
 		}
@@ -410,6 +438,7 @@ var GetProductsByCategoryId = http.HandlerFunc(func(w http.ResponseWriter, r *ht
 	}{
 		http.StatusInternalServerError, "Somethings wrong!",
 	})
+	w.WriteHeader(http.StatusInternalServerError)
 	w.Write([]byte(payload))
 	return
 })
