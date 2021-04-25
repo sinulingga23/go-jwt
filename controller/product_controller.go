@@ -26,6 +26,7 @@ var GetProducts = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) 
 		}{
 			http.StatusBadRequest, "Somethings wrong!", fmt.Sprintf("%s", err),
 		})
+		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(payload))
 		return
 	}
@@ -37,6 +38,7 @@ var GetProducts = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) 
 	}{
 		http.StatusOK, "Success to get the products", products,
 	})
+	w.WriteHeader(http.StatusOK)
 	w.Write([]byte(payload))
 	return
 })
@@ -56,6 +58,7 @@ var CreateProduct = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request
 		}{
 			http.StatusBadRequest, "invalid", fmt.Sprintf("%s", err),
 		})
+		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(payload))
 		return
 	}
@@ -68,6 +71,7 @@ var CreateProduct = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request
 		}{
 			http.StatusBadRequest, "Product should have the category", "BadRequest",
 		})
+		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(payload))
 		return
 	}
@@ -80,6 +84,7 @@ var CreateProduct = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request
 		}{
 			http.StatusBadRequest, "Product name can't be empty", "BadRequest",
 		})
+		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(payload))
 		return
 	}
@@ -92,6 +97,7 @@ var CreateProduct = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request
 		}{
 			http.StatusBadRequest, "Unit can't be empty", "BadRequest",
 		})
+		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(payload))
 		return
 	}
@@ -104,6 +110,7 @@ var CreateProduct = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request
 		}{
 			http.StatusBadRequest, "Stock can't be negative", "BadRequest",
 		})
+		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(payload))
 		return
 	}
@@ -116,6 +123,7 @@ var CreateProduct = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request
 		}{
 			http.StatusBadRequest, "Stock Add can't be negative", "BadRequest",
 		})
+		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(payload))
 		return
 	}
@@ -128,6 +136,7 @@ var CreateProduct = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request
 		}{
 			http.StatusBadRequest, "Price can't be negative", "BadRequest",
 		})
+		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(payload))
 		return
 	}
@@ -141,6 +150,7 @@ var CreateProduct = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request
 		}{
 			http.StatusNotFound, "Category can't be found", fmt.Sprintf("%s", err),
 		})
+		w.WriteHeader(http.StatusNotFound)
 		w.Write([]byte(payload))
 		return
 	}
@@ -156,6 +166,7 @@ var CreateProduct = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request
 			}{
 				http.StatusInternalServerError, "Somethings wrong!", fmt.Sprintf("%s", err),
 			})
+			w.WriteHeader(http.StatusInternalServerError)
 			w.Write([]byte(payload))
 			return
 		}
@@ -167,6 +178,7 @@ var CreateProduct = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request
 		}{
 			http.StatusOK, "Success to create a new product", createdProduct,
 		})
+		w.WriteHeader(http.StatusOK)
 		w.Write([]byte(payload))
 		return
 	}
@@ -177,6 +189,7 @@ var CreateProduct = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request
 	}{
 		http.StatusInternalServerError, "Somethings wrong!",
 	})
+	w.WriteHeader(http.StatusInternalServerError)
 	w.Write([]byte(payload))
 	return
 })
@@ -195,6 +208,7 @@ var GetProductByProductId = http.HandlerFunc(func(w http.ResponseWriter, r *http
 		}{
 			http.StatusBadRequest, "Invalid request", "BadRequest",
 		})
+		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(payload))
 		return
 	}
@@ -208,6 +222,7 @@ var GetProductByProductId = http.HandlerFunc(func(w http.ResponseWriter, r *http
 		}{
 			http.StatusNotFound, "Product can't be found", fmt.Sprintf("%s", err),
 		})
+		w.WriteHeader(http.StatusNotFound)
 		w.Write([]byte(payload))
 		return
 	}
@@ -221,6 +236,7 @@ var GetProductByProductId = http.HandlerFunc(func(w http.ResponseWriter, r *http
 		}{
 			http.StatusBadRequest, "Somethings wrong!", fmt.Sprintf("%s", err),
 		})
+		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(payload))
 		return
 	}
@@ -233,6 +249,7 @@ var GetProductByProductId = http.HandlerFunc(func(w http.ResponseWriter, r *http
 		}{
 			http.StatusOK, "Product is found!", currentProduct,
 		})
+		w.WriteHeader(http.StatusOK)
 		w.Write([]byte(payload))
 		return
 	}
@@ -243,6 +260,7 @@ var GetProductByProductId = http.HandlerFunc(func(w http.ResponseWriter, r *http
 	}{
 		http.StatusInternalServerError, "Somethings wrong!",
 	})
+	w.WriteHeader(http.StatusInternalServerError)
 	w.Write([]byte(payload))
 	return
 })
@@ -261,6 +279,7 @@ var UpdateProductByProductId = http.HandlerFunc(func(w http.ResponseWriter, r *h
 		}{
 			http.StatusBadRequest, "Invalid request", "BadRequest",
 		})
+		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(payload))
 		return
 	}
@@ -274,6 +293,7 @@ var UpdateProductByProductId = http.HandlerFunc(func(w http.ResponseWriter, r *h
 		}{
 			http.StatusBadRequest, "invalid", fmt.Sprintf("%s", err),
 		})
+		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(payload))
 		return
 	}
@@ -286,6 +306,7 @@ var UpdateProductByProductId = http.HandlerFunc(func(w http.ResponseWriter, r *h
 		}{
 			http.StatusBadRequest, "Product should have the category", "BadRequest",
 		})
+		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(payload))
 		return
 	}
@@ -298,6 +319,7 @@ var UpdateProductByProductId = http.HandlerFunc(func(w http.ResponseWriter, r *h
 		}{
 			http.StatusBadRequest, "ProductId is not same", "BadRequest",
 		})
+		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(payload))
 		return
 	}
@@ -310,6 +332,7 @@ var UpdateProductByProductId = http.HandlerFunc(func(w http.ResponseWriter, r *h
 		}{
 			http.StatusBadRequest, "Product name can't be empty", "BadRequest",
 		})
+		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(payload))
 		return
 	}
@@ -322,6 +345,7 @@ var UpdateProductByProductId = http.HandlerFunc(func(w http.ResponseWriter, r *h
 		}{
 			http.StatusBadRequest, "Unit can't be empty", "BadRequest",
 		})
+		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(payload))
 		return
 	}
@@ -334,6 +358,7 @@ var UpdateProductByProductId = http.HandlerFunc(func(w http.ResponseWriter, r *h
 		}{
 			http.StatusBadRequest, "Stock can't be negative", "BadRequest",
 		})
+		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(payload))
 		return
 	}
@@ -346,6 +371,7 @@ var UpdateProductByProductId = http.HandlerFunc(func(w http.ResponseWriter, r *h
 		}{
 			http.StatusBadRequest, "Stock Add can't be negative", "BadRequest",
 		})
+		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(payload))
 		return
 	}
@@ -358,6 +384,7 @@ var UpdateProductByProductId = http.HandlerFunc(func(w http.ResponseWriter, r *h
 		}{
 			http.StatusBadRequest, "Price can't be negative", "BadRequest",
 		})
+		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(payload))
 		return
 	}
@@ -372,6 +399,7 @@ var UpdateProductByProductId = http.HandlerFunc(func(w http.ResponseWriter, r *h
 		}{
 			http.StatusNotFound, "Product can't be found", fmt.Sprintf("%s", err),
 		})
+		w.WriteHeader(http.StatusNotFound)
 		w.Write([]byte(payload))
 		return
 	}
@@ -386,6 +414,7 @@ var UpdateProductByProductId = http.HandlerFunc(func(w http.ResponseWriter, r *h
 		}{
 			http.StatusNotFound, "Category can't be found", fmt.Sprintf("%s", err),
 		})
+		w.WriteHeader(http.StatusNotFound)
 		w.Write([]byte(payload))
 		return
 	}
@@ -400,6 +429,7 @@ var UpdateProductByProductId = http.HandlerFunc(func(w http.ResponseWriter, r *h
 			}{
 				http.StatusInternalServerError, "Somethings wrong!", fmt.Sprintf("%s", err),
 			})
+			w.WriteHeader(http.StatusInternalServerError)
 			w.Write([]byte(payload))
 			return
 		}
@@ -421,6 +451,7 @@ var UpdateProductByProductId = http.HandlerFunc(func(w http.ResponseWriter, r *h
 			}{
 				http.StatusInternalServerError, "Somethings wrong!", fmt.Sprintf("%s", err),
 			})
+			w.WriteHeader(http.StatusInternalServerError)
 			w.Write([]byte(payload))
 			return
 		} else {
@@ -431,6 +462,7 @@ var UpdateProductByProductId = http.HandlerFunc(func(w http.ResponseWriter, r *h
 			}{
 				http.StatusOK, "Success to update the product", updatedProduct,
 			})
+			w.WriteHeader(http.StatusOK)
 			w.Write([]byte(payload))
 			return
 		}
@@ -441,6 +473,7 @@ var UpdateProductByProductId = http.HandlerFunc(func(w http.ResponseWriter, r *h
 	}{
 		http.StatusInternalServerError, "Somethings wrong!",
 	})
+	w.WriteHeader(http.StatusInternalServerError)
 	w.Write([]byte(payload))
 	return
 })
@@ -459,6 +492,7 @@ var DeleteProductByProductId = http.HandlerFunc(func(w http.ResponseWriter, r *h
 		}{
 			http.StatusBadRequest, "Invalid request", "BadRequest",
 		})
+		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(payload))
 		return
 	}
@@ -473,6 +507,7 @@ var DeleteProductByProductId = http.HandlerFunc(func(w http.ResponseWriter, r *h
 		}{
 			http.StatusNotFound, "Product can't be found", fmt.Sprintf("%s", err),
 		})
+		w.WriteHeader(http.StatusNotFound)
 		w.Write([]byte(payload))
 		return
 	}
@@ -487,6 +522,7 @@ var DeleteProductByProductId = http.HandlerFunc(func(w http.ResponseWriter, r *h
 			}{
 				http.StatusInternalServerError, "Somethings wrong!", fmt.Sprintf("%s", err),
 			})
+			w.WriteHeader(http.StatusInternalServerError)
 			w.Write([]byte(payload))
 			return
 		}
@@ -498,6 +534,7 @@ var DeleteProductByProductId = http.HandlerFunc(func(w http.ResponseWriter, r *h
 			}{
 				http.StatusOK, "Success to delete the product",
 			})
+			w.WriteHeader(http.StatusOK)
 			w.Write([]byte(payload))
 			return
 		}
@@ -509,6 +546,7 @@ var DeleteProductByProductId = http.HandlerFunc(func(w http.ResponseWriter, r *h
 	}{
 		http.StatusInternalServerError, "Somethings wrong!",
 	})
+	w.WriteHeader(http.StatusInternalServerError)
 	w.Write([]byte(payload))
 	return
 })
