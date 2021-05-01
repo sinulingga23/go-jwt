@@ -467,7 +467,15 @@ var DeleteCategoryByCategoryId = http.HandlerFunc(func(w http.ResponseWriter, r 
 var GetProductsByCategoryId = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	vars := mux.Vars(r)
+	quries := r.URL.Query()
 	var categoryId int
+
+	var requestPage string
+	var requestLimit string
+	var page int = 0
+	var limit int = 0
+	var productModel model.Product
+
 
 	var err error
 	if categoryId, err = strconv.Atoi(vars["categoryId"]); err != nil {
@@ -499,8 +507,94 @@ var GetProductsByCategoryId = http.HandlerFunc(func(w http.ResponseWriter, r *ht
 	}
 
 	if isExist {
+		if requestPage = quries.Get("page"); requestPage == "" {
+			requestPage = "1"
+		}
+		if page, err = strconv.Atoi(requestPage); err != nil {
+			payload, _ := json.Marshal(struct {
+				StatusCode	int 	`json:"statusCode"`
+				Message		string 	`json:"message"`
+				Errors		string	`json:"errros"`
+			}{
+				http.StatusBadRequest,
+				"The parameters invalid",
+				"Bad Request",
+			})
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte(payload))
+			return
+		}
+
+		if requestLimit = quries.Get("limit"); requestLimit == "" {
+			requestLimit = "10"
+		}
+		if limit, err = strconv.Atoi(requestLimit); err != nil {
+			payload, _ := json.Marshal(struct {
+				StatusCode	int 	`json:"statusCode"`
+				Message		string 	`json:"message"`
+				Errors		string	`json:"errros"`
+			}{
+				http.StatusBadRequest,
+				"The parameters invalid",
+				"Bad Request",
+			})
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte(payload))
+			return
+		}
+
+		if page < 0 {
+			page = 1
+		}
+
+		if limit <= 0 {
+			limit = 10
+		} else if (limit > 25) {
+			limit = 25
+		}
+
+		var numberRecordsProduct int = 0
+		if numberRecordsProduct, err = productModel.GetNumberRecordsByCategoryId(categoryId); err != nil {
+			payload, _ := json.Marshal(struct {
+				StatusCode	int 	`json:"statusCode"`
+				Message		string 	`json:"message"`
+				Errors		string 	`json:"errors"`
+			}{
+				http.StatusInternalServerError,
+				"Somethings wrong!",
+				fmt.Sprintf("%s", err),
+			})
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte(payload))
+			return
+		}
+
+		var totalPages int = 0
+		if totalPages = numberRecordsProduct / limit; numberRecordsProduct % limit != 0 {
+			totalPages += 1
+		}
+
+		var nextPage string = fmt.Sprintf("/api/categories/%d/products?page=%d&limit=%d", categoryId, page+1, limit)
+		var prevPage string = fmt.Sprintf("/api/categories/%d/products?page=%d&limit=%d", categoryId, page-1, limit)
+
+		if (page+1) > totalPages {
+			nextPage = ""
+			page = 1
+		} else if (page-1) < 1 {
+			prevPage = ""
+			page = 1
+		}
+
+		if page >= 1 && limit >= numberRecordsProduct {
+			prevPage = ""
+			page = 1
+			limit = numberRecordsProduct
+		}
+		var offset int = 0
+		offset = limit * (page-1)
+
 		var products []model.Product
-		if products, err = categoryModel.FindProductsByCategoryId(categoryId); err != nil {
+		if products, err = categoryModel.FindProductsByCategoryId(categoryId, limit, offset); err != nil {
 			payload, _ := json.Marshal(struct {
 				StatusCode	int	`json:"statusCode"`
 				Message		string	`json:"message"`
@@ -514,13 +608,32 @@ var GetProductsByCategoryId = http.HandlerFunc(func(w http.ResponseWriter, r *ht
 		}
 
 		if products != nil {
+			type infoPagination struct {
+				CurrentPage	int 	`json:"currentPage"`
+				RowsEachPage	int 	`json:"rowsEachPage"`
+				TotalPages	int 	`json:"totalPage"`
+			}
+
 			payload, _ := json.Marshal(struct {
-				StatusCode	int 		`json:"statusCode"`
-				Message		string 		`json:"message"`
-				CategoryId	int 		`json:"categoryId"`
-				Data		[]model.Product	`json:"products"`
+				StatusCode	int			`json:"statusCode"`
+				Message		string			`json:"message"`
+				CategoryId	int 			`json:"categoryId"`
+				Products	[]model.Product		`json:"products"`
+				InfoPagination	infoPagination		`json:"infoPagination"`
+				NextPage	string 			`json:"nextPage"`
+				PrevPage	string 			`json:"prevPage"`
 			}{
-				http.StatusOK, "succes to get the products", categoryId, products,
+				http.StatusOK,
+				"Success to get the products",
+				categoryId,
+				products,
+				infoPagination {
+					page,
+					limit,
+					totalPages,
+				},
+				nextPage,
+				prevPage,
 			})
 			w.WriteHeader(http.StatusOK)
 			w.Write([]byte(payload))

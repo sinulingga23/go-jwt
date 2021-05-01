@@ -17,6 +17,22 @@ type Product struct {
 	Audit           Audit   `json:"audit"`
 }
 
+func (c *Product) GetNumberRecordsByCategoryId(categoryId int) (int, error) {
+	db, err := database.ConnectDB()
+	if err != nil {
+		return 0, err
+	}
+	defer db.Close()
+
+	var numberRecords int = 0
+	err = db.QueryRow("SELECT COUNT(product_id) FROM product WHERE category_id = ?", categoryId).Scan(&numberRecords)
+	if err != nil {
+		return 0, err
+	}
+
+	return numberRecords, nil
+}
+
 func (p *Product) IsProductExistByProductId(productId int) (bool, error) {
 	db, err := database.ConnectDB()
 	if err != nil {
