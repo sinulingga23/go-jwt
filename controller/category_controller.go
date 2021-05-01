@@ -16,12 +16,103 @@ import (
 
 var GetCategories = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
+	quries := r.URL.Query()
 
+	var requestPage string
+	var requestLimit string
+	var page int  = 0
+	var limit int  = 0
 	var categories []model.Category
 	var categoryModel model.Category
 	var err error
 
-	if categories, err = categoryModel.GetAllCategory(); err != nil {
+
+	if requestPage = quries.Get("page"); requestPage == "" {
+		requestPage = "1"
+	}
+	if page, err = strconv.Atoi(requestPage); err != nil {
+		payload, _ := json.Marshal(struct {
+			StatusCode	int 	`json:"statusCode"`
+			Message		string 	`json:"message"`
+			Errors		string	`json:"errros"`
+		}{
+			http.StatusBadRequest,
+			"The parameters invalid",
+			"Bad Request",
+		})
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(payload))
+		return
+	}
+
+	if requestLimit = quries.Get("limit"); requestLimit == "" {
+		requestLimit = "10"
+	}
+	if limit, err = strconv.Atoi(requestLimit); err != nil {
+		payload, _ := json.Marshal(struct {
+			StatusCode	int 	`json:"statusCode"`
+			Message		string 	`json:"message"`
+			Errors		string 	`json:"errors"`
+		}{
+			http.StatusBadRequest,
+			"The parameters invalid",
+			"Bad Request",
+		})
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(payload))
+		return
+	}
+
+	if page <= 0 {
+		page = 1
+	}
+
+	if limit <= 0 {
+		limit = 10
+	} else if limit > 25 {
+		limit = 25
+	}
+
+	var numberRecords int = 0
+	if numberRecords, err = categoryModel.GetNumberRecords(); err != nil {
+		payload, _ := json.Marshal(struct {
+			StatusCode	int 	`json:"statusCode"`
+			Message		string 	`json:"message"`
+			Errors		string 	`json:"errors"`
+		}{
+			http.StatusInternalServerError,
+			"Somethings wrong!",
+			fmt.Sprintf("%s", err),
+		})
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(payload))
+		return
+	}
+
+	var totalPages int  = 0
+	if totalPages = numberRecords / limit; numberRecords % limit != 0 {
+		totalPages += 1
+	}
+
+	var nextPage string = fmt.Sprintf("/categories?page=%d&limit=%d", page+1, limit)
+	var prevPage string = fmt.Sprintf("/categories?page=%d&limit=%d", page-1, limit)
+
+	if (page+1) > totalPages {
+		nextPage = ""
+		page = 1
+	} else if (page-1) < 0 {
+		prevPage = ""
+		page = 1
+	}
+
+	if page >= 1 && limit >= numberRecords {
+		page = 1
+		limit = numberRecords
+		prevPage = ""
+	}
+	var offset int = limit * (page-1)
+
+	if categories, err = categoryModel.GetAllCategory(limit, offset); err != nil {
 		payload, _ := json.Marshal(struct {
 			StatusCode	int		`json:"statusCode"`
 			Message		string		`json:"message"`
@@ -36,14 +127,30 @@ var GetCategories = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request
 		return
 	}
 
+	type infoPagination struct {
+		CurrentPage	int 	`json:"currentPage"`
+		RowsEachPage	int 	`json:"rowsEachPage"`
+		TotalPages	int 	`json:"totalPage"`
+	}
+
 	payload, _ := json.Marshal(struct {
 		StatusCode	int			`json:"statusCode"`
 		Message		string			`json:"message"`
-		Data		[]model.Category	`json:"categories"`
+		Categories	[]model.Category	`json:"categories"`
+		InfoPagination	infoPagination		`json:"infoPagination"`
+		NextPage	string 			`json:"nextPage"`
+		PrevPage	string 			`json:"prevPage"`
 	}{
 		http.StatusOK,
-		"Success to get categories",
+		"Success to get the categories",
 		categories,
+		infoPagination {
+			page,
+			limit,
+			totalPages,
+		},
+		nextPage,
+		prevPage,
 	})
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte(payload))

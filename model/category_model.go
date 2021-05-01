@@ -13,6 +13,22 @@ type Category struct {
 	Audit		Audit	`json:"audit"`
 }
 
+func (c *Category) GetNumberRecords() (int, error) {
+	db, err := database.ConnectDB()
+	if err != nil {
+		return 0, err
+	}
+	defer db.Close()
+
+	var numberRecords int = 0
+	err = db.QueryRow("SELECT count(category_id) FROM category").Scan(&numberRecords)
+	if err != nil {
+		return 0, err
+	}
+
+	return numberRecords, err
+}
+
 
 func (c *Category) IsCategoryExistByCategoryId(categoryId int) (bool, error) {
 	db, err := database.ConnectDB()
@@ -148,14 +164,14 @@ func (c *Category) DeleteCategoryByCategoryId(categoryId int) (bool, error) {
 	return true, nil
 }
 
-func (c *Category) GetAllCategory() ([]Category, error)  {
+func (c *Category) GetAllCategory(limit int, offset int) ([]Category, error)  {
 	db, err := database.ConnectDB()
 	if err != nil {
 		return []Category{}, err
 	}
 	defer db.Close()
 
-	rows, err := db.Query("SELECT category_id, category, created_at, updated_at FROM category")
+	rows, err := db.Query("SELECT category_id, category, created_at, updated_at FROM category LIMIT ? OFFSET ?", limit, offset)
 	if err != nil {
 		return []Category{}, err
 	}
