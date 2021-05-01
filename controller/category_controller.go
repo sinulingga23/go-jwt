@@ -94,8 +94,8 @@ var GetCategories = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request
 		totalPages += 1
 	}
 
-	var nextPage string = fmt.Sprintf("/categories?page=%d&limit=%d", page+1, limit)
-	var prevPage string = fmt.Sprintf("/categories?page=%d&limit=%d", page-1, limit)
+	var nextPage string = fmt.Sprintf("/api/categories?page=%d&limit=%d", page+1, limit)
+	var prevPage string = fmt.Sprintf("/api/categories?page=%d&limit=%d", page-1, limit)
 
 	if (page+1) > totalPages {
 		nextPage = ""
